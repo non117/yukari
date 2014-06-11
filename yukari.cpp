@@ -14,15 +14,6 @@ int main(int argc, char* argv[]){
 			double am_sim = DPmatching(master[i].sequence,  after[i].sequence);
 			cout << joint_name << " : " << bm_sim << " -> " << am_sim << " diff: " << bm_sim - am_sim << endl;
 		}
-		/*
-		cout << endl;
-		REP(i, JOINT_NUM){
-			string joint_name = master[i].name;
-			double bm_sim = DPmatching2(master[i].sequence, before[i].sequence);
-			double am_sim = DPmatching2(master[i].sequence,  after[i].sequence);
-			cout << joint_name << " : " << bm_sim << " -> " << am_sim << " diff: " << bm_sim - am_sim << endl; 
-		}
-		*/
 	}
 	return 0;
 }
