@@ -9,6 +9,42 @@ double Vector::operator * (const Vector& right) const{
 	return 1 - res;
 }
 
+vV Joint::calc_trajectory(vV &v){
+	vV result(v.size() - 1);
+	REP(i, v.size() - 1){
+		double x = v[i+1].x - v[i].x;
+		double y = v[i+1].y - v[i].y;
+		double z = v[i+1].z - v[i].z;
+		double t = v[i].t;
+		result[i] = Vector(x, y, z, t);
+	}
+	return result;
+}
+
+vV Joint::calc_diff1(vV &v){
+	vV result;
+	for(int i=1;i<v.size()-1;i++){
+		double h = 2 * (v[i+1].t - v[i-1].t);
+		double nx = (v[i+1].x - v[i-1].x) / h;
+		double ny = (v[i+1].y - v[i-1].y) / h;
+		double nz = (v[i+1].z - v[i-1].z) / h;
+		result.push_back(Vector(nx, ny, nz, v[i].t));
+	}
+	return result;
+}
+
+vV Joint::calc_diff2(vV &v){
+	vV result;
+	for(int i=1;i<v.size()-1;i++){
+		double h = (v[i+1].t - v[i].t) * (v[i+1].t - v[i].t);
+		double nx = (v[i+1].x - 2 * v[i].x + v[i-1].x) / h;
+		double ny = (v[i+1].y - 2 * v[i].y + v[i-1].y) / h;
+		double nz = (v[i+1].z - 2 * v[i].z + v[i-1].z) / h;
+		result.push_back(Vector(nx, ny, nz, v[i].t));
+	}
+	return result;
+}  
+
 vector<Joint> csv_to_joint(const string filename){
 	ifstream ifs(filename);
 	vector<Joint> data(JOINT_NUM);
@@ -25,8 +61,14 @@ vector<Joint> csv_to_joint(const string filename){
 			data[i].push_back(x, y, z, time);
 		}
 	}
-	REP(i, JOINT_NUM)
+	REP(i, JOINT_NUM){
 		data[i].name = NAME_MAP.at(i);
+		data[i].trajectory = Joint::calc_trajectory(data[i].sequence);
+		data[i].diff1 = Joint::calc_diff1(data[i].sequence);
+		data[i].diff1_traj = Joint::calc_trajectory(data[i].diff1);
+		data[i].diff2 = Joint::calc_diff2(data[i].sequence);
+		data[i].diff2_traj = Joint::calc_trajectory(data[i].diff2);
+	}
 	return data;
 }
 
@@ -64,21 +106,8 @@ void csv_writer(const string filename, const vector<vector<string> >& data){
 	}
 }
 
-vector<Vector> convert_to_trajectory(const vector<Vector>& v){
-	vector<Vector> result(v.size()-1);
-	REP(i, v.size()-1){
-		double x = v[i+1].x - v[i].x;
-		double y = v[i+1].y - v[i].y;
-		double z = v[i+1].z - v[i].z;
-		double t = v[i].t;
-		result[i] = Vector(x, y, z, t);
-	}
-	return result;
-}
 
-double DPmatching(const vector<Vector>& v1_orig, const vector<Vector>& v2_orig){
-	auto v1 = convert_to_trajectory(v1_orig);
-	auto v2 = convert_to_trajectory(v2_orig);
+double DPmatching(const vV& v1, const vV& v2){
 	int m = v1.size(), n = v2.size(), x, y;
 	vector<vector<Node> > path_matrix(m, vector<Node>(n));
 	Node point(v1[0]*v2[0], Point(-1,-1), Point(0,0));

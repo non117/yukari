@@ -10,8 +10,8 @@ int main(int argc, char* argv[]){
 		vector<Joint> after  = csv_to_joint( after_file);
 		REP(i, JOINT_NUM){
 			string joint_name = master[i].name;
-			double bm_sim = DPmatching(master[i].sequence, before[i].sequence);
-			double am_sim = DPmatching(master[i].sequence,  after[i].sequence);
+			double bm_sim = DPmatching(master[i].trajectory, before[i].trajectory);
+			double am_sim = DPmatching(master[i].trajectory,  after[i].trajectory);
 			cout << joint_name << " : " << bm_sim << " -> " << am_sim << " diff: " << bm_sim - am_sim << endl;
 		}
 	}

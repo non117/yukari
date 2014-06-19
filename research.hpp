@@ -30,14 +30,25 @@ class Vector{
 		const double norm() const{ return sqrt(x*x + y*y + z*z); };
 		double operator* (const Vector& right) const;
 };
+
+typedef vector<Vector> vV;
+
 class Joint{
 	public:
 		string name;
-		vector<Vector> sequence;
+		vV sequence;
+		vV trajectory;
+		vV diff1;
+		vV diff1_traj;
+		vV diff2;
+		vV diff2_traj;
 		Joint() = default;
 		void push_back(const double x, const double y, const double z, const double t){
 			sequence.push_back(Vector(x, y, z, t));
 		}
+		static vV calc_trajectory(vV &v);
+		static vV calc_diff1(vV &v);
+		static vV calc_diff2(vV &v);
 }; 
 
 class Point{
@@ -59,10 +70,22 @@ class Node{
 
 vector<Joint> csv_to_joint(const string filename);
 vector<vector<string> >csv_reader(const string filename);
-void csv_writer(const string filename, const vector<vector<string> > &data);
+//void csv_writer(const string filename, const vector<vector<string> > &data);
+template<typename T>
+void csv_writer(const string filename, const vector<vector<T> >& data){
+	ofstream ofs(filename);
+	for(vector<T> line_data:data){
+		int n = 1;
+		for(T cell:line_data){
+			if(n == line_data.size())
+				ofs << cell << endl;
+			else
+				ofs << cell << ',';
+		}
+	}  
+}   
 
 
-vector<Vector> convert_to_trajectory(const vector<Vector>& v);
-double DPmatching(const vector<Vector>& v1, const vector<Vector>& v2);
+double DPmatching(const vV& v1, const vV& v2);
 
 
