@@ -3,3 +3,6 @@ yukari
 *.pyc
 *.pyo
 *.un~
+.DS_Store
+.python-version
+output/

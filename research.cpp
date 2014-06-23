@@ -9,9 +9,9 @@ double Vector::operator * (const Vector& right) const{
 	return 1 - res;
 }
 
-vV Joint::calc_trajectory(vV &v){
+vV calc_trajectory(vV &v){
 	vV result(v.size() - 1);
-	REP(i, v.size() - 1){
+	for(int i=0;i<v.size()-1;i++){
 		double x = v[i+1].x - v[i].x;
 		double y = v[i+1].y - v[i].y;
 		double z = v[i+1].z - v[i].z;
@@ -21,55 +21,51 @@ vV Joint::calc_trajectory(vV &v){
 	return result;
 }
 
-vV Joint::calc_diff1(vV &v){
+vV calc_diff1(vV &v){
 	vV result;
 	for(int i=1;i<v.size()-1;i++){
 		double h = 2 * (v[i+1].t - v[i-1].t);
-		double nx = (v[i+1].x - v[i-1].x) / h;
-		double ny = (v[i+1].y - v[i-1].y) / h;
-		double nz = (v[i+1].z - v[i-1].z) / h;
-		result.push_back(Vector(nx, ny, nz, v[i].t));
+		double x = (v[i+1].x - v[i-1].x) / h;
+		double y = (v[i+1].y - v[i-1].y) / h;
+		double z = (v[i+1].z - v[i-1].z) / h;
+		result.push_back(Vector(x, y, z, v[i].t));
 	}
 	return result;
 }
 
-vV Joint::calc_diff2(vV &v){
+vV calc_diff2(vV &v){
 	vV result;
 	for(int i=1;i<v.size()-1;i++){
 		double h = (v[i+1].t - v[i].t) * (v[i+1].t - v[i].t);
-		double nx = (v[i+1].x - 2 * v[i].x + v[i-1].x) / h;
-		double ny = (v[i+1].y - 2 * v[i].y + v[i-1].y) / h;
-		double nz = (v[i+1].z - 2 * v[i].z + v[i-1].z) / h;
-		result.push_back(Vector(nx, ny, nz, v[i].t));
+		double x = (v[i+1].x - 2 * v[i].x + v[i-1].x) / h;
+		double y = (v[i+1].y - 2 * v[i].y + v[i-1].y) / h;
+		double z = (v[i+1].z - 2 * v[i].z + v[i-1].z) / h;
+		result.push_back(Vector(x, y, z, v[i].t));
 	}
 	return result;
-}  
+}
 
-vector<Joint> csv_to_joint(const string filename){
-	ifstream ifs(filename);
-	vector<Joint> data(JOINT_NUM);
-	string line;
-	double time, x, y, z;
-	int line_no = 0;
-	while(getline(ifs, line)){
-		replace(line.begin(), line.end(), ',', ' ');
-		stringstream buf(line);
-		if(line_no == 0){ line_no++; continue; }
-		buf >> time;
-		REP(i, JOINT_NUM){
-			buf >> x >> y >> z;
-			data[i].push_back(x, y, z, time);
+vV moving_average(const int n, const vV& v){
+	vV result;
+	int length = v.size();
+	vector<int> range;
+	for(int i=-(n/2);i<=(n/2);i++){
+		range.push_back(i);
+	}
+	for(int i=0;i<length;i++){
+		double x = 0, y = 0, z = 0;
+		int cnt = 0;
+		for(int j : range){
+			int index = i + j;
+			if(index < 0 || index >= length){ continue; }
+			x += v[index].x;
+			y += v[index].y;
+			z += v[index].z;
+			cnt++;
 		}
+		result.push_back(Vector(x/cnt, y/cnt, z/cnt, v[i].t));
 	}
-	REP(i, JOINT_NUM){
-		data[i].name = NAME_MAP.at(i);
-		data[i].trajectory = Joint::calc_trajectory(data[i].sequence);
-		data[i].diff1 = Joint::calc_diff1(data[i].sequence);
-		data[i].diff1_traj = Joint::calc_trajectory(data[i].diff1);
-		data[i].diff2 = Joint::calc_diff2(data[i].sequence);
-		data[i].diff2_traj = Joint::calc_trajectory(data[i].diff2);
-	}
-	return data;
+	return result;
 }
 
 vector<vector<string> > csv_reader(const string filename){
@@ -98,14 +94,54 @@ void csv_writer(const string filename, const vector<vector<string> >& data){
 	for(vector<string> line_data:data){
 		int n = 1;
 		for(string cell:line_data){
-			if(n == line_data.size())
+			if(n == line_data.size()){
 				ofs << cell << endl;
-			else
+			}else{
 				ofs << cell << ',';
+				n++;
+			}
 		}
 	}
+}  
+
+void output_vector(const string filename, vV &data){
+	vector<vector<string> > string_mat;
+	vector<double> x, y, z;
+	string_mat.push_back(vector<string>({"time","x","y","z"}));
+	for(Vector vec:data){
+		vector<string> temp = {to_string(vec.t), to_string(vec.x), to_string(vec.y), to_string(vec.z)};
+		string_mat.push_back(temp);
+	}
+	csv_writer(filename, string_mat);
 }
 
+vector<Joint> csv_to_joint(const string filename){
+	ifstream ifs(filename);
+	vector<Joint> data(JOINT_NUM);
+	string line;
+	double time, x, y, z;
+	int line_no = 0;
+	while(getline(ifs, line)){
+		replace(line.begin(), line.end(), ',', ' ');
+		stringstream buf(line);
+		if(line_no == 0){ line_no++; continue; }
+		buf >> time;
+		for(int i=0;i<JOINT_NUM;i++){
+			buf >> x >> y >> z;
+			data[i].push_back(x, y, z, time);
+		}
+	}
+	for(int i=0;i<JOINT_NUM;i++){
+		data[i].name = NAME_MAP.at(i);
+		data[i].sequence = moving_average(5, data[i].sequence);
+		data[i].trajectory = calc_trajectory(data[i].sequence);
+		data[i].diff1 = calc_diff1(data[i].sequence);
+		data[i].diff1_traj = calc_trajectory(data[i].diff1);
+		data[i].diff2 = calc_diff2(data[i].sequence);
+		data[i].diff2_traj = calc_trajectory(data[i].diff2);
+	}
+	return data;
+}
 
 double DPmatching(const vV& v1, const vV& v2){
 	int m = v1.size(), n = v2.size(), x, y;

@@ -14,6 +14,11 @@ int main(int argc, char* argv[]){
 			double am_sim = DPmatching(master[i].trajectory,  after[i].trajectory);
 			cout << joint_name << " : " << bm_sim << " -> " << am_sim << " diff: " << bm_sim - am_sim << endl;
 		}
+		REP(i, JOINT_NUM){
+			output_vector("output/master_" + master[i].name + "_seq__.csv", master[i].sequence);
+			output_vector("output/master_" + master[i].name + "_diff1__.csv", master[i].diff1);
+			output_vector("output/master_" + master[i].name + "_diff2__.csv", master[i].diff2);
+		}
 	}
 	return 0;
 }

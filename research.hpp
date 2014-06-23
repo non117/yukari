@@ -32,6 +32,17 @@ class Vector{
 };
 
 typedef vector<Vector> vV;
+vV calc_trajectory(vV &v);
+vV calc_diff1(vV &v);
+vV calc_diff2(vV &v); 
+vV moving_average(const int n, const vV& v);
+
+/*class vV2 : public vector<Vector>{
+	vV2 calc_trajectory();
+	vV2 calc_diff1();
+	vV2 calc_diff2();
+	vector<vector<string> > convert_to_string_matrix();
+};*/
 
 class Joint{
 	public:
@@ -46,9 +57,6 @@ class Joint{
 		void push_back(const double x, const double y, const double z, const double t){
 			sequence.push_back(Vector(x, y, z, t));
 		}
-		static vV calc_trajectory(vV &v);
-		static vV calc_diff1(vV &v);
-		static vV calc_diff2(vV &v);
 }; 
 
 class Point{
@@ -70,22 +78,8 @@ class Node{
 
 vector<Joint> csv_to_joint(const string filename);
 vector<vector<string> >csv_reader(const string filename);
-//void csv_writer(const string filename, const vector<vector<string> > &data);
-template<typename T>
-void csv_writer(const string filename, const vector<vector<T> >& data){
-	ofstream ofs(filename);
-	for(vector<T> line_data:data){
-		int n = 1;
-		for(T cell:line_data){
-			if(n == line_data.size())
-				ofs << cell << endl;
-			else
-				ofs << cell << ',';
-		}
-	}  
-}   
-
-
+void csv_writer(const string filename, const vector<vector<string> > &data);
+void output_vector(const string filename, vV& data);
 double DPmatching(const vV& v1, const vV& v2);
 
 
