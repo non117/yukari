@@ -41,7 +41,7 @@ def main():
     #    label_y = 'coordinate'
     #    legend = ['x', 'y', 'z']
     #    draw(ts, (xs, ys, zs), label_t, label_y, title, legend, filename=filename)
-    n = 3
+    n = 1
     i = 0
     j = n
     
@@ -56,8 +56,8 @@ def main():
             legends += ['x','y','z']
         title = ps[0].name
         filename = ps[0].name.replace('.csv','')
-        label_t = 'time (frame)'
-        label_y = 'coordinate'
+        label_t = 'time (sec)'
+        label_y = 'coordinate (mm)'
         draw(ts, envelopes, label_t, label_y, title, legends, filename=filename) 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ using namespace std;
 #define REP(i,n) for(int i=0;i<(int)(n);i++) 
 #define dump(n) cout<<"# "<<#n<<"="<<(n)<<endl
 
-// TODO : フィルタ, びぶん, ベクトル角度, csv export, グラフ描画, データの修正
+// TODO : データの修正
 
 const unordered_map<int, string> NAME_MAP{
 	{0,"Head"}, { 1,"Neck"}, { 2,"Torso"}, {3,"LeftShoulder"}, { 4,"LeftElbow"},
@@ -21,6 +21,12 @@ const unordered_map<int, string> NAME_MAP{
 	{ 13,"RightKnee"}, { 14,"RightFoot"}};
 const int JOINT_NUM = NAME_MAP.size();
 
+const unordered_map<int, string> BONE_MAP{
+	{0, "Head_to_Neck"}, {1, "Neck_to_Torso"}, {2, "Neck_to_LShoulder"},
+	{3, "Neck_to_RShoulder"}, {4, "Torso_to_LHip"}, {5, "Torso_to_RHip"},
+	{6, "LHip_to_LKnee"}, {7, "LKnee_to_LFoot"}, {8, "RHip_to_RKnee"}, {9, "RKnee_to_RFoot"}};
+const int BONE_NUM = BONE_MAP.size();
+
 class Vector{
 	public:
 		double x,y,z,t;
@@ -28,6 +34,9 @@ class Vector{
 		Vector(const double x, const double y, const double z, const double t) :
 			x(x), y(y), z(z), t(t) {}
 		const double norm() const{ return sqrt(x*x + y*y + z*z); };
+		// コサイン類似度
+		double operator& (const Vector& right) const;
+		// cos (ベクトルの角度)
 		double operator* (const Vector& right) const;
 };
 
@@ -76,10 +85,11 @@ class Node{
 		bool operator >(const Node& r) const{ return cost > r.cost; }
 };
 
-vector<Joint> csv_to_joint(const string filename);
+vector<Joint> csv_to_joint(const string filename, const int filter_n);
 vector<vector<string> >csv_reader(const string filename);
 void csv_writer(const string filename, const vector<vector<string> > &data);
 void output_vector(const string filename, vV& data);
+vector<vector<int> > combination(const vector<int>& arr, int r);
 double DPmatching(const vV& v1, const vV& v2);
 
 

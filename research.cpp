@@ -1,6 +1,6 @@
 #include "research.hpp"
 
-double Vector::operator * (const Vector& right) const{
+double Vector::operator& (const Vector& right) const{
 	double up = x * right.x + y * right.y + z * right.z;
 	double down = norm() * right.norm();
 	double res = up / down;
@@ -8,6 +8,12 @@ double Vector::operator * (const Vector& right) const{
 		res = 0;
 	return 1 - res;
 }
+
+double Vector::operator* (const Vector& right) const{
+	double up = x * right.x + y * right.y + z * right.z;
+	double down = norm() * right.norm();
+	return up / down;
+}  
 
 vV calc_trajectory(vV &v){
 	vV result(v.size() - 1);
@@ -104,6 +110,37 @@ void csv_writer(const string filename, const vector<vector<string> >& data){
 	}
 }  
 
+/* arr  ---> Input Array
+   n      ---> Size of input array
+   r      ---> Size of a combination to be printed
+   index  ---> Current index in data[]
+   data ---> Temporary array to store current combination
+   i      ---> index of current element in arr[]     */
+void combinationloop(const vector<int>& arr, int r, int index, vector<int>& data, int i, vector<vector<int> >& result){
+	// Current cobination is ready
+	int n = arr.size();
+    if (index == r){
+		result.push_back(data);
+		return;
+    }
+	// When no more elements are there to put in data[]
+	if (i >= n)
+		return;
+	// current is included, put next at next location
+	data[index] = arr[i];
+	combinationloop(arr, r, index+1, data, i+1, result);
+	// current is excluded, replace it with next (Note that
+	// i+1 is passed, but index is not changed)
+	combinationloop(arr, r, index, data, i+1, result);
+}
+
+vector<vector<int> > combination(const vector<int>& arr, int r){
+	vector<vector<int> > result;
+	vector<int> data(r);
+	combinationloop(arr, r, 0, data, 0, result);
+	return result;
+} 
+
 void output_vector(const string filename, vV &data){
 	vector<vector<string> > string_mat;
 	vector<double> x, y, z;
@@ -115,7 +152,7 @@ void output_vector(const string filename, vV &data){
 	csv_writer(filename, string_mat);
 }
 
-vector<Joint> csv_to_joint(const string filename){
+vector<Joint> csv_to_joint(const string filename, const int filter_n){
 	ifstream ifs(filename);
 	vector<Joint> data(JOINT_NUM);
 	string line;
@@ -133,7 +170,7 @@ vector<Joint> csv_to_joint(const string filename){
 	}
 	for(int i=0;i<JOINT_NUM;i++){
 		data[i].name = NAME_MAP.at(i);
-		data[i].sequence = moving_average(5, data[i].sequence);
+		data[i].sequence = moving_average(filter_n, data[i].sequence);
 		data[i].trajectory = calc_trajectory(data[i].sequence);
 		data[i].diff1 = calc_diff1(data[i].sequence);
 		data[i].diff1_traj = calc_trajectory(data[i].diff1);
@@ -146,7 +183,7 @@ vector<Joint> csv_to_joint(const string filename){
 double DPmatching(const vV& v1, const vV& v2){
 	int m = v1.size(), n = v2.size(), x, y;
 	vector<vector<Node> > path_matrix(m, vector<Node>(n));
-	Node point(v1[0]*v2[0], Point(-1,-1), Point(0,0));
+	Node point(v1[0]&v2[0], Point(-1,-1), Point(0,0));
 	path_matrix[0][0] = point;
 	//ダイクストラ法
 	priority_queue<Node, vector<Node>, greater<Node> > p_queue;
@@ -164,7 +201,7 @@ double DPmatching(const vV& v1, const vV& v2){
 		for(int i = 0; i < 3; i++){
 			int nx = cur_node.cur.x + dir_x[i];
 			int ny = cur_node.cur.y + dir_y[i];
-			float add_cost = v1[nx] * v2[ny];
+			double add_cost = v1[nx] & v2[ny];
 			if(nx < m && ny < n && path_matrix[nx][ny].cost > cur_node.cost + add_cost){
 				path_matrix[nx][ny].cost = cur_node.cost + add_cost;
 				path_matrix[nx][ny].prev = cur_node.cur;
