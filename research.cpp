@@ -156,13 +156,6 @@ void combinationloop(const vector<int>& arr, int r, int index, vector<int>& data
 	combinationloop(arr, r, index, data, i+1, result);
 }
 
-vector<vector<int> > combination(const vector<int>& arr, int r){
-	vector<vector<int> > result;
-	vector<int> data(r);
-	combinationloop(arr, r, 0, data, 0, result);
-	return result;
-} 
-
 void output_vector(const string filename, vV &data){
 	vector<vector<string> > string_mat;
 	vector<double> x, y, z;
@@ -219,59 +212,4 @@ vector<Joint> joint_to_bone(const vector<Joint>& joints){
 	}
 	return bones;
 }
-
-
-double DPmatching(const vV& v1, const vV& v2){
-	int m = v1.size(), n = v2.size(), x, y;
-	vector<vector<Node> > path_matrix(m, vector<Node>(n));
-	Node point(v1[0]&v2[0], Point(-1,-1), Point(0,0));
-	path_matrix[0][0] = point;
-	//ダイクストラ法
-	priority_queue<Node, vector<Node>, greater<Node> > p_queue;
-	p_queue.push(point);
-	while(!p_queue.empty()){
-		Node cur_node = p_queue.top();
-		p_queue.pop();
-		if(path_matrix[cur_node.cur.x][cur_node.cur.y].cost < cur_node.cost){
-			continue;
-		}
-		if(cur_node.cur.x == m-1 && cur_node.cur.y == n-1){
-			break;
-		}
-		static const short dir_x[] = {0,1,1}, dir_y[] = {1,1,0};
-		for(int i = 0; i < 3; i++){
-			int nx = cur_node.cur.x + dir_x[i];
-			int ny = cur_node.cur.y + dir_y[i];
-			double add_cost = v1[nx] & v2[ny];
-			if(nx < m && ny < n && path_matrix[nx][ny].cost > cur_node.cost + add_cost){
-				path_matrix[nx][ny].cost = cur_node.cost + add_cost;
-				path_matrix[nx][ny].prev = cur_node.cur;
-				p_queue.push(Node(path_matrix[nx][ny].cost,cur_node.cur,Point(nx,ny)));
-			}
-		}
-	}
-	vector<double> costs;
-	x = m - 1;
-	y = n - 1;
-	double prev_cost = path_matrix[x][y].cost;
-	while (x != -1) {
-		Node p = path_matrix[x][y];
-		double diff = prev_cost - p.cost;
-		costs.push_back(diff);
-		prev_cost = p.cost;
-		x = p.prev.x;
-		y = p.prev.y;
-	}
-	
-	reverse(costs.begin(), costs.end());
-	/*
-	for(auto a : costs)
-		cout << a << ",";
-	cout << endl;
-	*/
-	return path_matrix[m-1][n-1].cost / costs.size();
-}
-
-
-
 
