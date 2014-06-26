@@ -15,6 +15,28 @@ double Vector::operator* (const Vector& right) const{
 	return up / down;
 }  
 
+Vector Vector::operator- (const Vector& right) const{
+	Vector result = Vector(x - right.x, y - right.y, z - right.z, t);
+	return result;
+}
+
+Joint Joint::operator- (const Joint& right) const{
+	Joint result;
+	int length = sequence.size();
+	vV temp_sequence;
+	for(int i=0;i<length;i++){
+		temp_sequence.push_back(sequence[i] - right.sequence[i]);
+	}
+	result.sequence = temp_sequence;
+	result.trajectory = calc_trajectory(temp_sequence);
+	result.diff1 = calc_diff1(temp_sequence);
+	result.diff1_traj = calc_trajectory(result.diff1);
+	result.diff2 = calc_diff2(temp_sequence);
+	result.diff2_traj = calc_trajectory(result.diff2);
+	return result;
+}
+
+
 vV calc_trajectory(vV &v){
 	vV result(v.size() - 1);
 	for(int i=0;i<v.size()-1;i++){
@@ -179,6 +201,25 @@ vector<Joint> csv_to_joint(const string filename, const int filter_n){
 	}
 	return data;
 }
+
+vector<Joint> joint_to_bone(const vector<Joint>& joints){
+	vector<Joint> bones(BONE_NUM);
+	bones[0] = joints[1] - joints[0]; // Head to Neck
+	bones[1] = joints[2] - joints[1]; // Neck to Torso
+	bones[2] = joints[3] - joints[1]; // Neck to Left Shoulder
+	bones[3] = joints[6] - joints[1]; // Neck to Right Shoulder
+	bones[4] = joints[9] - joints[2]; // Torso to Left Hip
+	bones[5] = joints[12] - joints[2]; // Torso to Right Hip
+	bones[6] = joints[10] - joints[9]; // Left Hip to Left Knee
+	bones[7] = joints[11] - joints[10]; // Left Knee to Left Foot
+	bones[8] = joints[13] - joints[12]; // Right Hip to Right Knee
+	bones[9] = joints[14] - joints[13]; // Right Knee to Right Foot
+	for(int i=0;i<BONE_NUM;i++){
+		bones[i].name = BONE_MAP.at(i);
+	}
+	return bones;
+}
+
 
 double DPmatching(const vV& v1, const vV& v2){
 	int m = v1.size(), n = v2.size(), x, y;

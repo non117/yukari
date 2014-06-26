@@ -38,6 +38,8 @@ class Vector{
 		double operator& (const Vector& right) const;
 		// cos (ベクトルの角度)
 		double operator* (const Vector& right) const;
+		// ベクトル引き算
+		Vector operator- (const Vector& right) const;
 };
 
 typedef vector<Vector> vV;
@@ -66,6 +68,7 @@ class Joint{
 		void push_back(const double x, const double y, const double z, const double t){
 			sequence.push_back(Vector(x, y, z, t));
 		}
+		Joint operator- (const Joint& right) const;
 }; 
 
 class Point{
@@ -86,6 +89,7 @@ class Node{
 };
 
 vector<Joint> csv_to_joint(const string filename, const int filter_n);
+vector<Joint> joint_to_bone(const vector<Joint>& joints);
 vector<vector<string> >csv_reader(const string filename);
 void csv_writer(const string filename, const vector<vector<string> > &data);
 void output_vector(const string filename, vV& data);
