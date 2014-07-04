@@ -20,6 +20,11 @@ Vector Vector::operator- (const Vector& right) const{
 	return result;
 }
 
+Vector Vector::operator&& (const Vector& right) const{
+	Vector result = Vector(y*right.z - z*right.y, z*right.x - x*right.z, x*right.y - y*right.x, t);
+	return result;
+}
+
 Joint Joint::operator- (const Joint& right) const{
 	Joint result;
 	int length = sequence.size();
@@ -36,6 +41,19 @@ Joint Joint::operator- (const Joint& right) const{
 	return result;
 }
 
+vector<vector<string> > Result::make_csv_data() const {
+	vector<vector<string> > csv;
+	csv.push_back(vector<string>({"name:"+name}));
+	csv.push_back(vector<string>({"title:"+title}));
+	csv.push_back(vector<string>({"xlabel:"+xlabel}));
+	csv.push_back(vector<string>({"ylabel:"+ylabel}));
+	csv.push_back(vector<string>({""}));
+	csv.push_back(vector<string>({"similarity"}));
+	for(double s:similarity){
+		csv.push_back(vector<string>({to_string(s)}));
+	}
+	return csv;
+}
 
 vV calc_trajectory(vV &v){
 	vV result(v.size() - 1);
@@ -131,30 +149,6 @@ void csv_writer(const string filename, const vector<vector<string> >& data){
 		}
 	}
 }  
-
-/* arr  ---> Input Array
-   n      ---> Size of input array
-   r      ---> Size of a combination to be printed
-   index  ---> Current index in data[]
-   data ---> Temporary array to store current combination
-   i      ---> index of current element in arr[]     */
-void combinationloop(const vector<int>& arr, int r, int index, vector<int>& data, int i, vector<vector<int> >& result){
-	// Current cobination is ready
-	int n = arr.size();
-    if (index == r){
-		result.push_back(data);
-		return;
-    }
-	// When no more elements are there to put in data[]
-	if (i >= n)
-		return;
-	// current is included, put next at next location
-	data[index] = arr[i];
-	combinationloop(arr, r, index+1, data, i+1, result);
-	// current is excluded, replace it with next (Note that
-	// i+1 is passed, but index is not changed)
-	combinationloop(arr, r, index, data, i+1, result);
-}
 
 void output_vector(const string filename, vV &data){
 	vector<vector<string> > string_mat;

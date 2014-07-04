@@ -12,8 +12,6 @@ using namespace std;
 #define REP(i,n) for(int i=0;i<(int)(n);i++) 
 #define dump(n) cout<<"# "<<#n<<"="<<(n)<<endl
 
-// TODO : データの修正
-
 const unordered_map<int, string> NAME_MAP{
 	{0,"Head"}, { 1,"Neck"}, { 2,"Torso"}, {3,"LeftShoulder"}, { 4,"LeftElbow"},
 	{ 5,"LeftHand"}, {6,"RightShoulder"}, { 7,"RightElbow"}, { 8,"RightHand"},
@@ -40,6 +38,8 @@ class Vector{
 		double operator* (const Vector& right) const;
 		// ベクトル引き算
 		Vector operator- (const Vector& right) const;
+		// 外積
+		Vector operator&& (const Vector& right) const;
 };
 
 typedef vector<Vector> vV;
@@ -48,28 +48,26 @@ vV calc_diff1(vV &v);
 vV calc_diff2(vV &v); 
 vV moving_average(const int n, const vV& v);
 
-/*class vV2 : public vector<Vector>{
-	vV2 calc_trajectory();
-	vV2 calc_diff1();
-	vV2 calc_diff2();
-	vector<vector<string> > convert_to_string_matrix();
-};*/
-
 class Joint{
 	public:
 		string name;
-		vV sequence;
-		vV trajectory;
-		vV diff1;
-		vV diff1_traj;
-		vV diff2;
-		vV diff2_traj;
+		vV sequence, trajectory;
+		vV diff1, diff1_traj;
+		vV diff2, diff2_traj;
 		Joint() = default;
 		void push_back(const double x, const double y, const double z, const double t){
 			sequence.push_back(Vector(x, y, z, t));
 		}
 		Joint operator- (const Joint& right) const;
 }; 
+
+class Result{
+	public:
+		string name, title, filename, xlabel, ylabel;
+		vector<double> similarity;
+		vV good, bad;
+		vector<vector<string> > make_csv_data() const;
+};
 
 class Point{
 	public:
