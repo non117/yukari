@@ -18,6 +18,8 @@ const unordered_map<int, string> NAME_MAP{
 	{ 5,"LeftHand"}, {6,"RightShoulder"}, { 7,"RightElbow"}, { 8,"RightHand"},
 	{9,"LeftHip"}, { 10,"LeftKnee"}, { 11,"LeftFoot"}, {12,"RightHip"},
 	{ 13,"RightKnee"}, { 14,"RightFoot"}};
+// 4, 5, 7, 8は使わない
+const vector<int> EXCLUDES = {4,5,7,8};
 const int JOINT_NUM = NAME_MAP.size();
 
 const unordered_map<int, string> BONE_MAP{
@@ -61,16 +63,17 @@ class Joint{
 		}
 		Joint operator- (const Joint& right) const;
 		Joint operator&& (const Joint& right) const;
+		void write_csv() const;
 }; 
 
 class Result{
 	public:
 		string name;
-		int first, second;
 		double before, after;
 		vector<double> before_sims, after_sims;
 		Result() = default;
-		Result(const string name, const int first, const int second, const double before, const double after, const vector<double>& before_sims, const vector<double>& after_sims) : name(name), after(after), before(before), before_sims(before_sims), after_sims(after_sims) {}
+		Result(const string name, const double before, const double after, const vector<double>& before_sims, const vector<double>& after_sims) : name(name), after(after), before(before), before_sims(before_sims), after_sims(after_sims) {}
+		Result(const string name, const pair<double, vector<double> > before, const pair<double, vector<double> > after) : name(name), after(after.first), before(before.first), after_sims(after.second), before_sims(before.second) {}
 		void write_csv() const;
 		bool operator< (const Result& right) const{
 			return (after - before) < (right.after - right.before);

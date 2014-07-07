@@ -32,6 +32,7 @@ Joint Joint::operator- (const Joint& right) const{
 	for(int i=0;i<length;i++){
 		temp_sequence.push_back(sequence[i] - right.sequence[i]);
 	}
+	result.name = name + " - " + right.name;
 	result.sequence = temp_sequence;
 	result.trajectory = calc_trajectory(temp_sequence);
 	result.diff1 = calc_diff1(temp_sequence);
@@ -50,7 +51,7 @@ Joint Joint::operator&& (const Joint& right) const{
 		temp_diff1.push_back(diff1[i] && right.diff1[i]);
 		temp_diff2.push_back(diff2[i] && right.diff2[i]);
 	}
-	result.name = name + " - " + right.name;
+	result.name = name + " x " + right.name;
 	result.sequence = temp_sequence;
 	// 外積の場合は微分してからした方がいい気がする。要検証。
 	result.trajectory = calc_trajectory(temp_sequence);
@@ -59,6 +60,23 @@ Joint Joint::operator&& (const Joint& right) const{
 	result.diff2 = temp_diff2;
 	result.diff2_traj = calc_trajectory(temp_diff2);
 	return result;
+}
+
+void Joint::write_csv() const{
+	vector<vector<string> > csv;
+	csv.push_back(vector<string>({"name:"+name}));
+	int n = sequence.size() - 1;
+	for(int i=0;i<n;i++){
+		string t = to_string(sequence[i].t);
+		string sx = to_string(sequence[i].x);
+		string sy = to_string(sequence[i].y);
+		string sz = to_string(sequence[i].z);
+		string dx = to_string(diff1[i].x);
+		string dy = to_string(diff1[i].y);
+		string dz = to_string(diff1[i].z);
+		csv.push_back(vector<string>({t, sx, sy, sz, t, dx ,dy, dz}));
+	}
+	csv_writer(name+".csv", csv); 
 }
 
 void Result::write_csv() const{
