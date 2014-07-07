@@ -25,6 +25,15 @@ Vector Vector::operator&& (const Vector& right) const{
 	return result;
 }
 
+Joint Joint::normalized() const{
+	vV new_seq;
+	for(Vector elem : sequence){
+		new_seq.push_back(elem.normalized());
+	}
+	string new_name = name + " normalized";
+	return Joint(new_name, new_seq, calc_diff1(new_seq), calc_diff2(new_seq));
+}
+
 Joint Joint::operator- (const Joint& right) const{
 	Joint result;
 	int length = sequence.size();
@@ -102,7 +111,7 @@ void Result::write_csv() const{
 	csv_writer(name+".csv", csv);
 }
 
-vV calc_trajectory(vV &v){
+vV calc_trajectory(const vV &v){
 	vV result(v.size() - 1);
 	for(int i=0;i<v.size()-1;i++){
 		double x = v[i+1].x - v[i].x;
@@ -114,7 +123,7 @@ vV calc_trajectory(vV &v){
 	return result;
 }
 
-vV calc_diff1(vV &v){
+vV calc_diff1(const vV &v){
 	vV result;
 	for(int i=1;i<v.size()-1;i++){
 		double h = 2 * (v[i+1].t - v[i-1].t);
@@ -126,7 +135,7 @@ vV calc_diff1(vV &v){
 	return result;
 }
 
-vV calc_diff2(vV &v){
+vV calc_diff2(const vV &v){
 	vV result;
 	for(int i=1;i<v.size()-1;i++){
 		double h = (v[i+1].t - v[i].t) * (v[i+1].t - v[i].t);

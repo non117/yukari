@@ -35,6 +35,10 @@ class Vector{
 		Vector(const double x, const double y, const double z, const double t) :
 			x(x), y(y), z(z), t(t) {}
 		const double norm() const{ return sqrt(x*x + y*y + z*z); };
+		Vector normalized() const{
+			double n = norm();
+			return Vector(t, x/n, y/n, z/n);
+		}
 		// コサイン類似度
 		double operator& (const Vector& right) const;
 		// cos (ベクトルの角度)
@@ -46,9 +50,9 @@ class Vector{
 };
 
 typedef vector<Vector> vV;
-vV calc_trajectory(vV &v);
-vV calc_diff1(vV &v);
-vV calc_diff2(vV &v); 
+vV calc_trajectory(const vV &v);
+vV calc_diff1(const vV &v);
+vV calc_diff2(const vV &v);
 vV moving_average(const int n, const vV& v);
 
 class Joint{
@@ -58,9 +62,11 @@ class Joint{
 		vV diff1, diff1_traj;
 		vV diff2, diff2_traj;
 		Joint() = default;
+		Joint(const string name, const vV seq, const vV diff1, const vV diff2): name(name), sequence(seq), trajectory(calc_trajectory(seq)), diff1(diff1), diff1_traj(calc_trajectory(diff1)), diff2(diff2), diff2_traj(calc_trajectory(diff2)) {}
 		void push_back(const double x, const double y, const double z, const double t){
 			sequence.push_back(Vector(x, y, z, t));
 		}
+		Joint normalized() const;
 		Joint operator- (const Joint& right) const;
 		Joint operator&& (const Joint& right) const;
 		void write_csv() const;

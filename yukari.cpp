@@ -1,29 +1,25 @@
 #include "research.hpp"
 
-vector<Result> cross(const unordered_map<int, string> maps, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint>& after){
-	vector<int> numbers;
-	int n = maps.size();
-	for(int i=0;i<n;i++)
-		numbers.push_back(i);
-	vector<vector<int> > comb = combination(numbers, 2);
+void normal(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint>& after){
+	vector<int> numbers = {0,1,2,3,6,9,10,11,12,13,14};
+	vector<vector<int> > comb = combination(numbers, 3);
 	vector<Result> result;
 	for(auto sample : comb){
 		int first = sample[0];
 		int second = sample[1];
-		Joint cross_master = master[first] && master[second];
-		Joint cross_before = before[first] && before[second];
-		Joint cross_after = after[first] && after[second];
+		int third = sample[2];
+		Joint cross_master = ((master[first] - master[second]) && (master[first] - master[third])).normalized();
+		Joint cross_before = ((before[first] - before[second]) && (before[first] - before[third])).normalized();
+		Joint cross_after = ((after[first] - after[second]) && (after[first] - after[third])).normalized();
 		auto res_mb = DPmatching(cross_master.trajectory, cross_before.trajectory);
 		auto res_ma = DPmatching(cross_master.trajectory, cross_after.trajectory);
 		auto v_mb = DPmatching(cross_master.diff1_traj, cross_before.diff1_traj);
 		auto v_ma = DPmatching(cross_master.diff1_traj, cross_after.diff1_traj);
-		//cout << v_mb.second[20];
 		Result temp = Result(cross_master.name, res_mb, res_ma);
 		Result tempv = Result(cross_master.name + " velocity", v_mb, v_ma);
-		result.push_back(temp);
-		//result.push_back(tempv);
+		results.push_back(temp);
+		results.push_back(tempv);
 	}
-	return result;
 }
 
 void foot_coord(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint> after){
@@ -85,12 +81,14 @@ int main(int argc, char* argv[]){
 		vector<Result> results;
 		foot_coord(results, master, before, after);
 		torso_coord(results, master, before, after);
+		normal(results, master, before, after);
 		sort(results.begin(), results.end());
-		for(int i=0;i<45;i++){
-			auto r = results[i];
+		int i = 0;
+		for(Result r: results){
 			if(r.after - r.before > 0)
 				break;
 			cout << i << ", " << r.name << ", " << r.before << ", " << r.after << endl;
+			i++;
 		}
 	}
 	return 0;
