@@ -1,4 +1,5 @@
 #include<vector>
+#include<algorithm>
 #include<fstream>
 #include<iostream>
 #include<string>
@@ -59,14 +60,21 @@ class Joint{
 			sequence.push_back(Vector(x, y, z, t));
 		}
 		Joint operator- (const Joint& right) const;
+		Joint operator&& (const Joint& right) const;
 }; 
 
 class Result{
 	public:
-		string name, title, filename, xlabel, ylabel;
-		vector<double> similarity;
-		vV good, bad;
-		vector<vector<string> > make_csv_data() const;
+		string name;
+		int first, second;
+		double before, after;
+		vector<double> before_sims, after_sims;
+		Result() = default;
+		Result(const string name, const int first, const int second, const double before, const double after, const vector<double>& before_sims, const vector<double>& after_sims) : name(name), after(after), before(before), before_sims(before_sims), after_sims(after_sims) {}
+		void write_csv() const;
+		bool operator< (const Result& right) const{
+			return (after - before) < (right.after - right.before);
+		}
 };
 
 class Point{
@@ -127,7 +135,7 @@ vector<vector<T1> > combination(const vector<T1>& arr, int r){
 }  
 
 template<class T2>
-double DPmatching(const vector<T2>& v1, const vector<T2>& v2){
+pair<double, vector<double> > DPmatching(const vector<T2>& v1, const vector<T2>& v2){
 	int m = v1.size(), n = v2.size(), x, y;
 	vector<vector<Node> > path_matrix(m, vector<Node>(n));
 	Node point(v1[0]&v2[0], Point(-1,-1), Point(0,0));
@@ -175,7 +183,7 @@ double DPmatching(const vector<T2>& v1, const vector<T2>& v2){
 		cout << a << ",";
 	cout << endl;
 	*/
-	return path_matrix[m-1][n-1].cost / costs.size();
+	return make_pair(path_matrix[m-1][n-1].cost / costs.size(), costs);
 }  
 
 

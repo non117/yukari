@@ -41,18 +41,47 @@ Joint Joint::operator- (const Joint& right) const{
 	return result;
 }
 
-vector<vector<string> > Result::make_csv_data() const {
+Joint Joint::operator&& (const Joint& right) const{
+	Joint result;
+	int length = sequence.size();
+	vV temp_sequence, temp_diff1, temp_diff2;
+	for(int i=0;i<length;i++){
+		temp_sequence.push_back(sequence[i] && right.sequence[i]);
+		temp_diff1.push_back(diff1[i] && right.diff1[i]);
+		temp_diff2.push_back(diff2[i] && right.diff2[i]);
+	}
+	result.name = name + " - " + right.name;
+	result.sequence = temp_sequence;
+	// 外積の場合は微分してからした方がいい気がする。要検証。
+	result.trajectory = calc_trajectory(temp_sequence);
+	result.diff1 = temp_diff1;
+	result.diff1_traj = calc_trajectory(temp_diff1);
+	result.diff2 = temp_diff2;
+	result.diff2_traj = calc_trajectory(temp_diff2);
+	return result;
+}
+
+void Result::write_csv() const{
 	vector<vector<string> > csv;
 	csv.push_back(vector<string>({"name:"+name}));
-	csv.push_back(vector<string>({"title:"+title}));
-	csv.push_back(vector<string>({"xlabel:"+xlabel}));
-	csv.push_back(vector<string>({"ylabel:"+ylabel}));
+	csv.push_back(vector<string>({"title:similarity of "+name}));
+	csv.push_back(vector<string>({"xlabel:similarity"}));
+	csv.push_back(vector<string>({"ylabel:frame"}));
 	csv.push_back(vector<string>({""}));
-	csv.push_back(vector<string>({"similarity"}));
-	for(double s:similarity){
-		csv.push_back(vector<string>({to_string(s)}));
+	csv.push_back(vector<string>({"before - master", "after - master"}));
+	int n = max(before_sims.size(), after_sims.size());
+	for(int i=0;i<n;i++){
+		string b = " ";
+		if(i < before_sims.size()){
+			b = to_string(before_sims[i]);
+		}
+		string a = " ";
+		if(i < after_sims.size()){
+			a = to_string(after_sims[i]);
+		}
+		csv.push_back(vector<string>({b, a}));
 	}
-	return csv;
+	csv_writer(name+".csv", csv);
 }
 
 vV calc_trajectory(vV &v){
