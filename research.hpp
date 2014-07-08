@@ -27,6 +27,7 @@ const unordered_map<int, string> BONE_MAP{
 	{3, "Neck_to_RShoulder"}, {4, "Torso_to_LHip"}, {5, "Torso_to_RHip"},
 	{6, "LHip_to_LKnee"}, {7, "LKnee_to_LFoot"}, {8, "RHip_to_RKnee"}, {9, "RKnee_to_RFoot"}};
 const int BONE_NUM = BONE_MAP.size();
+const string OUTPUT_DIR = "output/";
 
 class Vector{
 	public:
@@ -37,7 +38,7 @@ class Vector{
 		const double norm() const{ return sqrt(x*x + y*y + z*z); };
 		Vector normalized() const{
 			double n = norm();
-			return Vector(t, x/n, y/n, z/n);
+			return Vector(x/n, y/n, z/n, t);
 		}
 		// コサイン類似度
 		double operator& (const Vector& right) const;
@@ -77,9 +78,24 @@ class Result{
 		string name;
 		double before, after;
 		vector<double> before_sims, after_sims;
+		vector<Joint> master_joint, before_joint, after_joint;
 		Result() = default;
 		Result(const string name, const double before, const double after, const vector<double>& before_sims, const vector<double>& after_sims) : name(name), after(after), before(before), before_sims(before_sims), after_sims(after_sims) {}
 		Result(const string name, const pair<double, vector<double> > before, const pair<double, vector<double> > after) : name(name), after(after.first), before(before.first), after_sims(after.second), before_sims(before.second) {}
+		//Result(const string& name, const Joint master, const Joint before, const Joint after, const bool is_velocity);
+			/*
+			if( !is_velocity){
+				auto mb = DPmatching(master.trajectory, before.trajectory);
+				auto ma = DPmatching(master.trajectory, after.trajectory);
+			}else{
+				auto mb = DPmatching(master.diff1_traj, before.diff1_traj);
+				auto ma = DPmatching(master.diff1_traj, after.diff1_traj);
+			}
+			this->name = name;
+			this->before = mb.first; this->after = ma.first;
+			this->before_sims = mb.second; this->after_sims = ma.second;
+			this->master_joint = master; this->before_joint = before; this->after_joint = after;
+		}*/
 		void write_csv() const;
 		bool operator< (const Result& right) const{
 			return (after - before) < (right.after - right.before);

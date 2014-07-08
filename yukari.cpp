@@ -1,6 +1,6 @@
 #include "research.hpp"
 
-void normal(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint>& after){
+void perpendicular(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint>& after){
 	vector<int> numbers = {0,1,2,3,6,9,10,11,12,13,14};
 	vector<vector<int> > comb = combination(numbers, 3);
 	vector<Result> result;
@@ -11,14 +11,16 @@ void normal(vector<Result>& results, const vector<Joint>& master, const vector<J
 		Joint cross_master = ((master[first] - master[second]) && (master[first] - master[third])).normalized();
 		Joint cross_before = ((before[first] - before[second]) && (before[first] - before[third])).normalized();
 		Joint cross_after = ((after[first] - after[second]) && (after[first] - after[third])).normalized();
+		cross_after.write_csv();
+		string name = "perpendicular of "+NAME_MAP.at(first)+" "+NAME_MAP.at(second)+" "+NAME_MAP.at(third);
 		auto res_mb = DPmatching(cross_master.trajectory, cross_before.trajectory);
 		auto res_ma = DPmatching(cross_master.trajectory, cross_after.trajectory);
 		auto v_mb = DPmatching(cross_master.diff1_traj, cross_before.diff1_traj);
 		auto v_ma = DPmatching(cross_master.diff1_traj, cross_after.diff1_traj);
-		Result temp = Result(cross_master.name, res_mb, res_ma);
-		Result tempv = Result(cross_master.name + " velocity", v_mb, v_ma);
-		results.push_back(temp);
-		results.push_back(tempv);
+		//Result temp = Result(name, cross_master, cross_before, cross_after, false);
+		//Result tempv = Result(name + " velocity",cross_master, cross_before, cross_after, true);
+		results.push_back(Result(name, res_mb, res_ma));
+		//results.push_back(Result(name + " velocity", v_mb, v_ma));
 	}
 }
 
@@ -81,13 +83,14 @@ int main(int argc, char* argv[]){
 		vector<Result> results;
 		foot_coord(results, master, before, after);
 		torso_coord(results, master, before, after);
-		normal(results, master, before, after);
+		perpendicular(results, master, before, after);
 		sort(results.begin(), results.end());
+		results[0].write_csv();
 		int i = 0;
 		for(Result r: results){
 			if(r.after - r.before > 0)
 				break;
-			cout << i << ", " << r.name << ", " << r.before << ", " << r.after << endl;
+			cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
 			i++;
 		}
 	}

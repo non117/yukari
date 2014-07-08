@@ -85,8 +85,25 @@ void Joint::write_csv() const{
 		string dz = to_string(diff1[i].z);
 		csv.push_back(vector<string>({t, sx, sy, sz, t, dx ,dy, dz}));
 	}
-	csv_writer(name+".csv", csv); 
+	csv_writer(OUTPUT_DIR + name+".csv", csv); 
 }
+
+/*
+Result::Result(const string& name, const Joint master, const Joint before, const Joint after, const bool is_velocity){
+	pair<double, vector<double> > ma, mb;
+	if( !is_velocity){
+				mb = DPmatching(master.trajectory, before.trajectory);
+				ma = DPmatching(master.trajectory, after.trajectory);
+			}else{
+				mb = DPmatching(master.diff1_traj, before.diff1_traj);
+				ma = DPmatching(master.diff1_traj, after.diff1_traj);
+			}
+			this->name = name;
+			this->before = mb.first; this->after = ma.first;
+			this->before_sims = mb.second; this->after_sims = ma.second;
+			this->master_joint = master; this->before_joint = before; this->after_joint = after;
+}
+*/
 
 void Result::write_csv() const{
 	vector<vector<string> > csv;
@@ -108,7 +125,7 @@ void Result::write_csv() const{
 		}
 		csv.push_back(vector<string>({b, a}));
 	}
-	csv_writer(name+".csv", csv);
+	csv_writer(OUTPUT_DIR + name+".csv", csv);
 }
 
 vV calc_trajectory(const vV &v){

@@ -5,4 +5,4 @@ yukari
 *.un~
 .DS_Store
 .python-version
-output/
+output*/
