@@ -16,46 +16,17 @@ void perpendicular(vector<Result>& results, const vector<Joint>& master, const v
 	}
 }
 
-void foot_coord(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint> after){
+void x_coord(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint> after, const int joint_no){
 	for(int i=0;i<JOINT_NUM;i++){
 		if( find(EXCLUDES.begin(), EXCLUDES.end(), i) == EXCLUDES.end()){
-			if(i == 11)
+			if( i == joint_no)
 				continue;
-			Joint lhoot_master = master[i] - master[11];
-			Joint lhoot_before = before[i] - before[11];
-			Joint lhoot_after = after[i] - after[11];
-			auto lhoot_mb = DPmatching(lhoot_master.trajectory, lhoot_before.trajectory);
-			auto lhoot_ma = DPmatching(lhoot_master.trajectory, lhoot_after.trajectory);
-			auto lhoot_mb_v = DPmatching(lhoot_master.diff1_traj, lhoot_before.diff1_traj);
-			auto lhoot_ma_v = DPmatching(lhoot_master.diff1_traj, lhoot_after.diff1_traj);
-			results.push_back(Result(lhoot_master.name, lhoot_mb, lhoot_ma));
-			results.push_back(Result(lhoot_master.name+" velocity", lhoot_mb_v, lhoot_ma_v));
-			if(i == 14)
-				continue;
-			Joint rhoot_master = master[i] - master[14];
-			Joint rhoot_before = before[i] - before[14];
-			Joint rhoot_after = after[i] - after[14];
-			auto rhoot_mb = DPmatching(rhoot_master.trajectory, rhoot_before.trajectory);
-			auto rhoot_ma = DPmatching(rhoot_master.trajectory, rhoot_after.trajectory);
-			auto rhoot_mb_v = DPmatching(rhoot_master.diff1_traj, rhoot_before.diff1_traj);
-			auto rhoot_ma_v = DPmatching(rhoot_master.diff1_traj, rhoot_after.diff1_traj);
-			results.push_back(Result(rhoot_master.name, rhoot_mb, rhoot_ma));
-			results.push_back(Result(rhoot_master.name+" velocity", rhoot_mb_v, rhoot_ma_v));
-		}
-	}
-}
-
-void torso_coord(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint> after){
-	for(int i=0;i<JOINT_NUM;i++){
-		if( find(EXCLUDES.begin(), EXCLUDES.end(), i) == EXCLUDES.end()){ 
-			if(i == 2)
-				continue;
-			auto mb = DPmatching(master[i].trajectory, before[i].trajectory);
-			auto ma = DPmatching(master[i].trajectory, after[i].trajectory);
-			auto mb_v = DPmatching(master[i].diff1_traj, before[i].diff1_traj);
-			auto ma_v = DPmatching(master[i].diff1_traj, after[i].diff1_traj);
-			results.push_back(Result(master[i].name, mb, ma));
-			results.push_back(Result(master[i].name+" velocity", mb_v, ma_v));
+			Joint m = master[i] - master[joint_no];
+			Joint b = before[i] - before[joint_no];
+			Joint a = after[i] - after[joint_no];
+			string name = NAME_MAP.at(joint_no) + " coordinate of " + NAME_MAP.at(i);
+			results.push_back(Result(name, m, b, a));
+			results.push_back(Result(name + " velocity", m, b, a, true));
 		}
 	}
 }
@@ -73,8 +44,9 @@ int main(int argc, char* argv[]){
 		vector<Joint> before_bones = joint_to_bone(before);
 		vector<Joint> after_bones = joint_to_bone(after);
 		vector<Result> results, locals;
-		foot_coord(results, master, before, after);
-		torso_coord(results, master, before, after);
+		x_coord(results, master, before, after, 11); // LeftFoot
+		x_coord(results, master, before, after, 14); // RightFoot
+		x_coord(results, master, before, after, 2); // Torso
 		perpendicular(locals, master, before, after);
 		sort(results.begin(), results.end());
 		sort(locals.begin(), locals.end());
