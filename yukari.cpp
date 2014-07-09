@@ -5,22 +5,14 @@ void perpendicular(vector<Result>& results, const vector<Joint>& master, const v
 	vector<vector<int> > comb = combination(numbers, 3);
 	vector<Result> result;
 	for(auto sample : comb){
-		int first = sample[0];
-		int second = sample[1];
-		int third = sample[2];
-		Joint cross_master = ((master[first] - master[second]) && (master[first] - master[third])).normalized();
-		Joint cross_before = ((before[first] - before[second]) && (before[first] - before[third])).normalized();
-		Joint cross_after = ((after[first] - after[second]) && (after[first] - after[third])).normalized();
-		cross_after.write_csv();
-		string name = "perpendicular of "+NAME_MAP.at(first)+" "+NAME_MAP.at(second)+" "+NAME_MAP.at(third);
-		auto res_mb = DPmatching(cross_master.trajectory, cross_before.trajectory);
-		auto res_ma = DPmatching(cross_master.trajectory, cross_after.trajectory);
-		auto v_mb = DPmatching(cross_master.diff1_traj, cross_before.diff1_traj);
-		auto v_ma = DPmatching(cross_master.diff1_traj, cross_after.diff1_traj);
-		//Result temp = Result(name, cross_master, cross_before, cross_after, false);
-		//Result tempv = Result(name + " velocity",cross_master, cross_before, cross_after, true);
-		results.push_back(Result(name, res_mb, res_ma));
-		//results.push_back(Result(name + " velocity", v_mb, v_ma));
+		int i = sample[0];
+		int j = sample[1];
+		int k = sample[2];
+		Joint perpend_master = ((master[i] - master[j]) && (master[i] - master[k])).normalized();
+		Joint perpend_before = ((before[i] - before[j]) && (before[i] - before[k])).normalized();
+		Joint perpend_after = ((after[i] - after[j]) && (after[i] - after[k])).normalized();
+		string name = "perpendicular of "+NAME_MAP.at(i)+" "+NAME_MAP.at(j)+" "+NAME_MAP.at(k);
+		results.push_back(Result(name, perpend_master, perpend_before, perpend_after));
 	}
 }
 
@@ -80,15 +72,22 @@ int main(int argc, char* argv[]){
 		vector<Joint> master_bones = joint_to_bone(master);
 		vector<Joint> before_bones = joint_to_bone(before);
 		vector<Joint> after_bones = joint_to_bone(after);
-		vector<Result> results;
+		vector<Result> results, locals;
 		foot_coord(results, master, before, after);
 		torso_coord(results, master, before, after);
-		perpendicular(results, master, before, after);
+		perpendicular(locals, master, before, after);
 		sort(results.begin(), results.end());
-		results[0].write_csv();
+		sort(locals.begin(), locals.end());
 		int i = 0;
+		for(Result r: locals){
+			if(i == 20)
+				break;
+			//cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
+			i++;
+		}
+		i = 0;
 		for(Result r: results){
-			if(r.after - r.before > 0)
+			if(r.after - r.before > 0 || i==100)
 				break;
 			cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
 			i++;

@@ -70,7 +70,7 @@ class Joint{
 		Joint normalized() const;
 		Joint operator- (const Joint& right) const;
 		Joint operator&& (const Joint& right) const;
-		void write_csv() const;
+		void write_csv(const string filename = "") const;
 }; 
 
 class Result{
@@ -78,25 +78,11 @@ class Result{
 		string name;
 		double before, after;
 		vector<double> before_sims, after_sims;
-		vector<Joint> master_joint, before_joint, after_joint;
+		Joint master_joint, before_joint, after_joint;
 		Result() = default;
-		Result(const string name, const double before, const double after, const vector<double>& before_sims, const vector<double>& after_sims) : name(name), after(after), before(before), before_sims(before_sims), after_sims(after_sims) {}
 		Result(const string name, const pair<double, vector<double> > before, const pair<double, vector<double> > after) : name(name), after(after.first), before(before.first), after_sims(after.second), before_sims(before.second) {}
-		//Result(const string& name, const Joint master, const Joint before, const Joint after, const bool is_velocity);
-			/*
-			if( !is_velocity){
-				auto mb = DPmatching(master.trajectory, before.trajectory);
-				auto ma = DPmatching(master.trajectory, after.trajectory);
-			}else{
-				auto mb = DPmatching(master.diff1_traj, before.diff1_traj);
-				auto ma = DPmatching(master.diff1_traj, after.diff1_traj);
-			}
-			this->name = name;
-			this->before = mb.first; this->after = ma.first;
-			this->before_sims = mb.second; this->after_sims = ma.second;
-			this->master_joint = master; this->before_joint = before; this->after_joint = after;
-		}*/
-		void write_csv() const;
+		Result(const string& name, const Joint master, const Joint before, const Joint after, const bool is_velocity = false);
+		void write_csv(const string filename = "") const;
 		bool operator< (const Result& right) const{
 			return (after - before) < (right.after - right.before);
 		}
