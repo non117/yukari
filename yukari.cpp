@@ -1,5 +1,10 @@
 #include "research.hpp"
 
+// TODO : similarity( variable, data no ).csvを出力するやつ
+// 軸周り座標系のやつ
+// 時間で切るやつ
+// 角度
+
 void perpendicular(vector<Result>& results, const vector<Joint>& master, const vector<Joint>& before, const vector<Joint>& after){
 	vector<int> numbers = {0,1,2,3,6,9,10,11,12,13,14};
 	vector<vector<int> > comb = combination(numbers, 3);
