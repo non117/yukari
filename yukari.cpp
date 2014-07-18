@@ -37,6 +37,30 @@ void x_coord(vector<Result>& results, const vector<Joint>& master, const vector<
 	}
 }
 
+void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>& after){
+	vector<Result> results, locals;
+	x_coord(results, master, before, after, 11); // LeftFoot
+	x_coord(results, master, before, after, 14); // RightFoot
+	x_coord(results, master, before, after, 2); // Torso
+	perpendicular(locals, master, before, after);
+	sort(results.begin(), results.end());
+	sort(locals.begin(), locals.end());
+	int i = 0;
+	for(Result r: locals){
+		if(i == 20)
+			break;
+		//cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
+		i++;
+	}
+	i = 0;
+	for(Result r: results){
+		if(r.after - r.before > 0 || i==100)
+			break;
+		cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
+		i++;
+	}
+}
+
 int main(int argc, char* argv[]){
 	int filter_n = 5;
 	if(argc == 4){
@@ -46,30 +70,10 @@ int main(int argc, char* argv[]){
 		vector<Joint> master = csv_to_joint(master_file, filter_n);
 		vector<Joint> before = csv_to_joint(before_file, filter_n);
 		vector<Joint> after  = csv_to_joint( after_file, filter_n);
-		vector<Joint> master_bones = joint_to_bone(master);
-		vector<Joint> before_bones = joint_to_bone(before);
-		vector<Joint> after_bones = joint_to_bone(after);
-		vector<Result> results, locals;
-		x_coord(results, master, before, after, 11); // LeftFoot
-		x_coord(results, master, before, after, 14); // RightFoot
-		x_coord(results, master, before, after, 2); // Torso
-		perpendicular(locals, master, before, after);
-		sort(results.begin(), results.end());
-		sort(locals.begin(), locals.end());
-		int i = 0;
-		for(Result r: locals){
-			if(i == 20)
-				break;
-			//cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
-			i++;
-		}
-		i = 0;
-		for(Result r: results){
-			if(r.after - r.before > 0 || i==100)
-				break;
-			cout << i << ", " << r.name << ", " << r.before << ", " << r.after << ", " << r.before - r.after << endl;
-			i++;
-		}
+		//vector<Joint> master_bones = joint_to_bone(master);
+		//vector<Joint> before_bones = joint_to_bone(before);
+		//vector<Joint> after_bones = joint_to_bone(after);
+		izukura_method(master, before, after);
 	}
 	return 0;
 }
