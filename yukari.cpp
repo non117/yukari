@@ -37,6 +37,46 @@ void x_coord(vector<Result>& results, const vector<Joint>& master, const vector<
 	}
 }
 
+pair<vector<string>, vector<double> > perpendicular_sim(const vector<Joint>& master, const vector<Joint>& student){
+	vector<int> numbers = {0,1,2,3,6,9,10,11,12,13,14};
+	vector<vector<int> > comb = combination(numbers, 3);
+	vector<double> sims;
+	vector<string> names;
+	for(auto sample : comb){
+		int i = sample[0];
+		int j = sample[1];
+		int k = sample[2];
+		Joint perpend_master = ((master[i] - master[j])&&(master[i] - master[k])).normalized();
+		Joint perpend_student = ((student[i] - student[j])&&(student[i] - student[k])).normalized();
+		string name = "perpendicular of "+NAME_MAP.at(i)+" "+NAME_MAP.at(j)+" "+NAME_MAP.at(k);
+		auto s = DPmatching(perpend_master.trajectory, perpend_student.trajectory);
+		sims.push_back(s.first);
+		names.push_back(name);
+	}
+	return make_pair(names, sims);
+} 
+
+pair<vector<string>, vector<double> > x_coord_sim(const vector<Joint>& master, const vector<Joint>& student, const int joint_no){
+	vector<double> sims;
+	vector<string> names;
+	for(int i=0;i<JOINT_NUM;i++){
+		if( find(EXCLUDES.begin(), EXCLUDES.end(), i) == EXCLUDES.end()){
+			if( i == joint_no)
+				continue;
+			Joint m = master[i] - master[joint_no];
+			Joint s = student[i] - student[joint_no];
+			string name = NAME_MAP.at(joint_no) + " coordinate of " + NAME_MAP.at(i);
+			auto sim = DPmatching(m.trajectory, s.trajectory);
+			auto sim_v = DPmatching(m.diff1_traj, s.diff1_traj);
+			sims.push_back(sim.first);
+			sims.push_back(sim_v.first);
+			names.push_back(name);
+			names.push_back(name + " velocity");
+		}
+	} 
+	return make_pair(names, sims);
+}
+
 void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>& after){
 	vector<Result> results, locals;
 	x_coord(results, master, before, after, 11); // LeftFoot
@@ -62,7 +102,8 @@ void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>&
 }
 
 void output_all_similarity(vector<string>& data){
-	string master = data[0];
+	vector<Joint> master = csv_to_joint(data[0], 5);
+	vector<vector<string> > results;
 }
 
 int main(int argc, char* argv[]){
