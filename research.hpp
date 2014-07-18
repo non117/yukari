@@ -64,8 +64,8 @@ class Joint{
 		vV diff2, diff2_traj;
 		Joint() = default;
 		Joint(const string name, const vV seq, const vV diff1, const vV diff2): name(name), sequence(seq), trajectory(calc_trajectory(seq)), diff1(diff1), diff1_traj(calc_trajectory(diff1)), diff2(diff2), diff2_traj(calc_trajectory(diff2)) {}
-		void emplace_back(const double x, const double y, const double z, const double t){
-			sequence.emplace_back(Vector(x, y, z, t));
+		void push_back(const double x, const double y, const double z, const double t){
+			sequence.push_back(Vector(x, y, z, t));
 		}
 		Joint normalized() const;
 		Joint operator- (const Joint& right) const;
@@ -123,7 +123,7 @@ void combinationloop(const vector<T1>& arr, int r, int index, vector<T1>& data, 
 	// Current cobination is ready
 	int n = arr.size();
     if (index == r){
-		result.emplace_back(data);
+		result.push_back(data);
 		return;
     }
 	// When no more elements are there to put in data[]
