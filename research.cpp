@@ -28,7 +28,7 @@ Vector Vector::operator&& (const Vector& right) const{
 Joint Joint::normalized() const{
 	vV new_seq;
 	for(Vector elem : sequence){
-		new_seq.push_back(elem.normalized());
+		new_seq.emplace_back(elem.normalized());
 	}
 	string new_name = name + " normalized";
 	return Joint(new_name, new_seq, calc_diff1(new_seq), calc_diff2(new_seq));
@@ -39,7 +39,7 @@ Joint Joint::operator- (const Joint& right) const{
 	int length = sequence.size();
 	vV temp_sequence;
 	for(int i=0;i<length;i++){
-		temp_sequence.push_back(sequence[i] - right.sequence[i]);
+		temp_sequence.emplace_back(sequence[i] - right.sequence[i]);
 	}
 	result.name = name + " - " + right.name;
 	result.sequence = temp_sequence;
@@ -56,9 +56,9 @@ Joint Joint::operator&& (const Joint& right) const{
 	int length = sequence.size();
 	vV temp_sequence, temp_diff1, temp_diff2;
 	for(int i=0;i<length;i++){
-		temp_sequence.push_back(sequence[i] && right.sequence[i]);
-		temp_diff1.push_back(diff1[i] && right.diff1[i]);
-		temp_diff2.push_back(diff2[i] && right.diff2[i]);
+		temp_sequence.emplace_back(sequence[i] && right.sequence[i]);
+		temp_diff1.emplace_back(diff1[i] && right.diff1[i]);
+		temp_diff2.emplace_back(diff2[i] && right.diff2[i]);
 	}
 	result.name = name + " x " + right.name;
 	result.sequence = temp_sequence;
@@ -73,7 +73,7 @@ Joint Joint::operator&& (const Joint& right) const{
 
 void Joint::write_csv(const string filename) const{
 	vector<vector<string> > csv;
-	csv.push_back(vector<string>({"name:"+name}));
+	csv.emplace_back(vector<string>({"name:"+name}));
 	int n = sequence.size() - 1;
 	for(int i=0;i<n;i++){
 		string t = to_string(sequence[i].t);
@@ -83,7 +83,7 @@ void Joint::write_csv(const string filename) const{
 		string dx = to_string(diff1[i].x);
 		string dy = to_string(diff1[i].y);
 		string dz = to_string(diff1[i].z);
-		csv.push_back(vector<string>({t, sx, sy, sz, t, dx ,dy, dz}));
+		csv.emplace_back(vector<string>({t, sx, sy, sz, t, dx ,dy, dz}));
 	}
 	string filename_;
 	if(filename == ""){
@@ -111,12 +111,12 @@ Result::Result(const string& name, const Joint master, const Joint before, const
 
 void Result::write_csv(const string filename) const{
 	vector<vector<string> > csv;
-	csv.push_back(vector<string>({"name:"+name}));
-	csv.push_back(vector<string>({"title:similarity of "+name}));
-	csv.push_back(vector<string>({"xlabel:similarity"}));
-	csv.push_back(vector<string>({"ylabel:frame"}));
-	csv.push_back(vector<string>({""}));
-	csv.push_back(vector<string>({"before - master", "after - master"}));
+	csv.emplace_back(vector<string>({"name:"+name}));
+	csv.emplace_back(vector<string>({"title:similarity of "+name}));
+	csv.emplace_back(vector<string>({"xlabel:similarity"}));
+	csv.emplace_back(vector<string>({"ylabel:frame"}));
+	csv.emplace_back(vector<string>({""}));
+	csv.emplace_back(vector<string>({"before - master", "after - master"}));
 	int n = max(before_sims.size(), after_sims.size());
 	for(int i=0;i<n;i++){
 		string b = " ";
@@ -127,7 +127,7 @@ void Result::write_csv(const string filename) const{
 		if(i < after_sims.size()){
 			a = to_string(after_sims[i]);
 		}
-		csv.push_back(vector<string>({b, a}));
+		csv.emplace_back(vector<string>({b, a}));
 	}
 	string filename_;
 	if(filename == ""){
@@ -157,7 +157,7 @@ vV calc_diff1(const vV &v){
 		double x = (v[i+1].x - v[i-1].x) / h;
 		double y = (v[i+1].y - v[i-1].y) / h;
 		double z = (v[i+1].z - v[i-1].z) / h;
-		result.push_back(Vector(x, y, z, v[i].t));
+		result.emplace_back(Vector(x, y, z, v[i].t));
 	}
 	return result;
 }
@@ -169,7 +169,7 @@ vV calc_diff2(const vV &v){
 		double x = (v[i+1].x - 2 * v[i].x + v[i-1].x) / h;
 		double y = (v[i+1].y - 2 * v[i].y + v[i-1].y) / h;
 		double z = (v[i+1].z - 2 * v[i].z + v[i-1].z) / h;
-		result.push_back(Vector(x, y, z, v[i].t));
+		result.emplace_back(Vector(x, y, z, v[i].t));
 	}
 	return result;
 }
@@ -179,7 +179,7 @@ vV moving_average(const int n, const vV& v){
 	int length = v.size();
 	vector<int> range;
 	for(int i=-(n/2);i<=(n/2);i++){
-		range.push_back(i);
+		range.emplace_back(i);
 	}
 	for(int i=0;i<length;i++){
 		double x = 0, y = 0, z = 0;
@@ -192,7 +192,7 @@ vV moving_average(const int n, const vV& v){
 			z += v[index].z;
 			cnt++;
 		}
-		result.push_back(Vector(x/cnt, y/cnt, z/cnt, v[i].t));
+		result.emplace_back(Vector(x/cnt, y/cnt, z/cnt, v[i].t));
 	}
 	return result;
 }
@@ -211,8 +211,8 @@ vector<vector<string> > csv_reader(const string filename){
 		stringstream buf(line);
 		vector<string> tmp;
 		while(buf >> cell)
-			tmp.push_back(cell);
-		data.push_back(tmp);
+			tmp.emplace_back(cell);
+		data.emplace_back(tmp);
 		line_no++;
 	}
 	return data; 
@@ -236,10 +236,10 @@ void csv_writer(const string filename, const vector<vector<string> >& data){
 void output_vector(const string filename, vV &data){
 	vector<vector<string> > string_mat;
 	vector<double> x, y, z;
-	string_mat.push_back(vector<string>({"time","x","y","z"}));
+	string_mat.emplace_back(vector<string>({"time","x","y","z"}));
 	for(Vector vec:data){
 		vector<string> temp = {to_string(vec.t), to_string(vec.x), to_string(vec.y), to_string(vec.z)};
-		string_mat.push_back(temp);
+		string_mat.emplace_back(temp);
 	}
 	csv_writer(filename, string_mat);
 }
@@ -257,7 +257,7 @@ vector<Joint> csv_to_joint(const string filename, const int filter_n){
 		buf >> time;
 		for(int i=0;i<JOINT_NUM;i++){
 			buf >> x >> y >> z;
-			data[i].push_back(x, y, z, time);
+			data[i].emplace_back(x, y, z, time);
 		}
 	}
 	for(int i=0;i<JOINT_NUM;i++){

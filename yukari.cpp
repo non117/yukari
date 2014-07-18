@@ -18,7 +18,7 @@ void perpendicular(vector<Result>& results, const vector<Joint>& master, const v
 		Joint perpend_before = ((before[i] - before[j]) && (before[i] - before[k])).normalized();
 		Joint perpend_after = ((after[i] - after[j]) && (after[i] - after[k])).normalized();
 		string name = "perpendicular of "+NAME_MAP.at(i)+" "+NAME_MAP.at(j)+" "+NAME_MAP.at(k);
-		results.push_back(Result(name, perpend_master, perpend_before, perpend_after));
+		results.emplace_back(Result(name, perpend_master, perpend_before, perpend_after));
 	}
 }
 
@@ -31,8 +31,8 @@ void x_coord(vector<Result>& results, const vector<Joint>& master, const vector<
 			Joint b = before[i] - before[joint_no];
 			Joint a = after[i] - after[joint_no];
 			string name = NAME_MAP.at(joint_no) + " coordinate of " + NAME_MAP.at(i);
-			results.push_back(Result(name, m, b, a));
-			results.push_back(Result(name + " velocity", m, b, a, true));
+			results.emplace_back(Result(name, m, b, a));
+			results.emplace_back(Result(name + " velocity", m, b, a, true));
 		}
 	}
 }
@@ -61,12 +61,28 @@ void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>&
 	}
 }
 
+void output_all_similarity(vector<string>& data){
+	string master = data[0];
+}
+
 int main(int argc, char* argv[]){
 	int filter_n = 5;
-	if(argc == 4){
-		string master_file = argv[1];
-		string before_file = argv[2];
-		string after_file  = argv[3];
+	// -all master.csv, hoge.csv
+	string option;
+	if(argc > 1){
+		option = argv[1];
+	}else{
+		return 0;
+	}
+	if(option == "-all"){
+		vector<string> data;
+		for(int i=2;i<argc;i++)
+			data.emplace_back(argv[i]);
+		output_all_similarity(data);
+	}else if(option == "-izukura" && argc == 5){
+		string master_file = argv[2];
+		string before_file = argv[3];
+		string after_file  = argv[4];
 		vector<Joint> master = csv_to_joint(master_file, filter_n);
 		vector<Joint> before = csv_to_joint(before_file, filter_n);
 		vector<Joint> after  = csv_to_joint( after_file, filter_n);
