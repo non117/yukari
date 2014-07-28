@@ -115,7 +115,7 @@ void output_vector(const string filename, vV& data);
 template<class T>
 vector<string> map_to_string(const vector<T>& src){
 	vector<string> dest;
-	transform(begin(src), end(src), back_inserter(dest), static_cast<string(*)(T)>(to_string));
+	transform(begin(src), end(src), back_inserter(dest), static_cast<string(*)(T)>(to_string)); // static_castよくわからん, 調べよう.
 	return dest;
 }
 
