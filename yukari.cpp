@@ -101,9 +101,33 @@ void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>&
 	}
 }
 
-void output_all_similarity(vector<string>& data){
-	vector<Joint> master = csv_to_joint(data[0], 5);
+// 時刻分割は、それぞれのファイルをどこで時分割するか人間が決定し、メモしておく
+
+void output_all_similarity(vector<string>& filenames){
+	vector<Joint> master = csv_to_joint(filenames[0], 5);
+	vector<string> header = {"filenames"};
 	vector<vector<string> > results;
+	for(int i=1;i<filenames.size();i++){
+		vector<Joint> student = csv_to_joint(filenames[i], 5);
+		auto lfootcoord = x_coord_sim(master, student, 11);
+		auto rfootcoord = x_coord_sim(master, student, 14);
+		auto torsocoord = x_coord_sim(master, student, 0);
+		auto perpend = perpendicular_sim(master, student);
+		if(i == 1){
+			concat(header, lfootcoord.first);
+			concat(header, rfootcoord.first);
+			concat(header, torsocoord.first);
+			concat(header, perpend.first);
+		}
+		vector<string> temp;
+		temp.push_back(filenames[i]);
+		concat(temp, map_to_string(lfootcoord.second));
+		concat(temp, map_to_string(rfootcoord.second));
+		concat(temp, map_to_string(torsocoord.second));
+		concat(temp, map_to_string(perpend.second));
+		results.push_back(temp);
+	}
+	csv_writer("all_similarity.csv", results);
 }
 
 int main(int argc, char* argv[]){
@@ -116,10 +140,10 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 	if(option == "-all"){
-		vector<string> data;
+		vector<string> filenames;
 		for(int i=2;i<argc;i++)
-			data.push_back(argv[i]);
-		output_all_similarity(data);
+			filenames.push_back(argv[i]);
+		output_all_similarity(filenames);
 	}else if(option == "-izukura" && argc == 5){
 		string master_file = argv[2];
 		string before_file = argv[3];

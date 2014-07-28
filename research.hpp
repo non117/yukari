@@ -3,6 +3,7 @@
 #include<fstream>
 #include<iostream>
 #include<string>
+#include<iterator>
 #include<sstream>
 #include<cmath>
 #include<unordered_map>
@@ -111,6 +112,17 @@ vector<vector<string> >csv_reader(const string filename);
 void csv_writer(const string filename, const vector<vector<string> > &data);
 void output_vector(const string filename, vV& data);
 
+template<class T>
+vector<string> map_to_string(const vector<T>& src){
+	vector<string> dest;
+	transform(begin(src), end(src), back_inserter(dest), static_cast<string(*)(T)>(to_string));
+	return dest;
+}
+
+template<class T>
+void concat(vector<T>& dest, const vector<T> & src){
+	dest.insert(end(dest), begin(src), end(src));
+}
 
 template<class T1>
 /* arr  ---> Input Array
