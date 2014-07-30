@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pylab
 
-workdir = Path('raw')
+workdir = Path('output')
 
 def draw(time, datas, label_t, label_y, title, legend=[], axis=[], filename=''):
     pylab.clf()
@@ -33,6 +33,14 @@ def load_csv(filepath):
 
 def main():
     paths = [x for x in workdir.iterdir() if x.suffix == '.csv']
+    #for path in paths:
+    #    ts, xs, ys, zs = load_csv(path)
+    #    title = path.name
+    #    filename = path.name.replace('.csv','')
+    #    label_t = 'time (frame)'
+    #    label_y = 'coordinate'
+    #    legend = ['x', 'y', 'z']
+    #    draw(ts, (xs, ys, zs), label_t, label_y, title, legend, filename=filename)
     n = 1
     i = 0
     j = n

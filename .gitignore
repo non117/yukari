@@ -6,3 +6,5 @@ yukari
 .DS_Store
 .python-version
 output*/
+all_similarity.csv
+raw/
