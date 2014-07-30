@@ -73,7 +73,7 @@ Joint Joint::operator&& (const Joint& right) const{
 
 void Joint::write_csv(const string filename) const{
 	vector<vector<string> > csv;
-	csv.push_back(vector<string>({"name:"+name}));
+	csv.push_back(vector<string>({"time","x","y","z","time","dx","dy","dz"}));
 	int n = sequence.size() - 1;
 	for(int i=0;i<n;i++){
 		string t = to_string(sequence[i].t);
@@ -87,9 +87,9 @@ void Joint::write_csv(const string filename) const{
 	}
 	string filename_;
 	if(filename == ""){
-		filename_ = OUTPUT_DIR + name + ".csv";
+		filename_ = name + ".csv";
 	}else{
-		filename_ = OUTPUT_DIR + filename + ".csv";
+		filename_ = filename + ".csv";
 	}
 	csv_writer(filename_, csv); 
 }

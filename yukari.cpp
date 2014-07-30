@@ -110,13 +110,14 @@ void output_all_similarity(vector<string>& filenames){
 		vector<Joint> student = csv_to_joint(filenames[i], 5);
 		auto lfootcoord = x_coord_sim(master, student, 11);
 		auto rfootcoord = x_coord_sim(master, student, 14);
-		auto torsocoord = x_coord_sim(master, student, 0);
+		auto torsocoord = x_coord_sim(master, student, 2);
 		auto perpend = perpendicular_sim(master, student);
 		if(i == 1){
 			concat(header, lfootcoord.first);
 			concat(header, rfootcoord.first);
 			concat(header, torsocoord.first);
 			concat(header, perpend.first);
+			results.push_back(header);
 		}
 		vector<string> temp;
 		temp.push_back(filenames[i]);
@@ -127,6 +128,18 @@ void output_all_similarity(vector<string>& filenames){
 		results.push_back(temp);
 	}
 	csv_writer("all_similarity.csv", results);
+}
+
+void output_raw_csv(vector<string>& filenames){
+	string delim ("/");
+	for(string& filename : filenames){
+		vector<string> list_string;
+		boost::split(list_string, filename, boost::is_any_of(delim));
+		vector<Joint> joints = csv_to_joint(filename, 5);
+		for(Joint& joint : joints){
+			joint.write_csv("raw/" + list_string[1] + "_" + joint.name);
+		}
+	}
 }
 
 int main(int argc, char* argv[]){
@@ -150,10 +163,12 @@ int main(int argc, char* argv[]){
 		vector<Joint> master = csv_to_joint(master_file, filter_n);
 		vector<Joint> before = csv_to_joint(before_file, filter_n);
 		vector<Joint> after  = csv_to_joint( after_file, filter_n);
-		//vector<Joint> master_bones = joint_to_bone(master);
-		//vector<Joint> before_bones = joint_to_bone(before);
-		//vector<Joint> after_bones = joint_to_bone(after);
 		izukura_method(master, before, after);
+	}else if(option == "-raw"){
+		vector<string> filenames;
+		for(int i=2;i<argc;i++)
+			filenames.push_back(argv[i]);
+		output_raw_csv(filenames);
 	}
 	return 0;
 }

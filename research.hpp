@@ -8,6 +8,7 @@
 #include<cmath>
 #include<unordered_map>
 #include<queue>
+#include<boost/algorithm/string.hpp>
 
 using namespace std;
 
