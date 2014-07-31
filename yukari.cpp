@@ -100,7 +100,9 @@ void izukura_method(vector<Joint>& master, vector<Joint>& before, vector<Joint>&
 	}
 }
 
-// 時刻分割は、それぞれのファイルをどこで時分割するか人間が決定し、メモしておく
+void time_slice_izukura_method(string& timetxt){
+	
+}
 
 void output_all_similarity(vector<string>& filenames){
 	vector<Joint> master = csv_to_joint(filenames[0], 5);
@@ -169,6 +171,9 @@ int main(int argc, char* argv[]){
 		for(int i=2;i<argc;i++)
 			filenames.push_back(argv[i]);
 		output_raw_csv(filenames);
+	}else if(option == "-time"){
+		string timetxt = argv[2];
+		time_slice_izukura_method(timetxt);
 	}
 	return 0;
 }
